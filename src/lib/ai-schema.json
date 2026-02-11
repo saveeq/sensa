@@ -3,23 +3,66 @@
   "type": "object",
   "required": ["title", "summary", "items"],
   "properties": {
-    "title": {
-      "type": "string"
-    },
-    "summary": {
-      "type": "string"
-    },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
     "items": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["id", "text", "done"],
-        "properties": {
-          "id": { "type": "string" },
-          "text": { "type": "string" },
-          "done": { "type": "boolean" }
-        },
-        "additionalProperties": false
+        "oneOf": [
+          {
+            "title": "Task",
+            "required": ["id", "text", "done"],
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" },
+              "done": { "type": "boolean" },
+              "deadline": { "type": "string", "format": "date-time" },
+              "description": { "type": "string" },
+              "priority": { "enum": ["low", "medium", "high"] },
+              "tags": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          {
+            "title": "Idea",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          },
+          {
+            "title": "AdditionalQuestion",
+            "required": ["id", "text"],
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" }
+            }
+          },
+          {
+            "title": "ShoppingItem",
+            "required": ["id", "name", "bought"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "string" },
+              "category": { "type": "string" },
+              "bought": { "type": "boolean" }
+            }
+          },
+          {
+            "title": "WishlistItem",
+            "required": ["id", "title", "rarity", "isGiftIdea"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "rarity": { "enum": ["common", "uncommon", "rare", "epic", "legendary"] },
+              "isGiftIdea": { "type": "boolean" },
+              "price": { "type": "string" },
+              "link": { "type": "string" }
+            }
+          }
+        ]
       }
     }
   },

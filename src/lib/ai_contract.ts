@@ -1,18 +1,40 @@
-export type Owner = "me" | "partner" | "both"
-export type Priority = "low" | "medium" | "high"
+export type WorkSpaceOwner = "me" | "both"
+export type TaskPriority = "low" | "medium" | "high"
+export type WishRarity = "common" | "rare" | "epic" | "legendary"
 
-export type Task = {
+export interface Task {
   id: string
   text: string
   done: boolean
+  deadline?: Date
+  description?: string
+  priority?: TaskPriority
+  tags?: string[]
 }
 
-export type Idea = {
+export interface Idea {
   id: string
   title: string
+  description?: string
 }
 
-export type Question = {
+export interface ShoppingItem {
+  id: string
+  name: string
+  quantity?: string 
+  bought: boolean
+}
+
+export interface WishlistItem {
+  id: string
+  title: string
+  price?: string
+  link?: string
+  rarity: WishRarity
+  isGiftIdea: boolean // пометка, если это идея для подарка
+}
+
+export interface AdditionalQuestion  {
   id: string
   text: string
 }
@@ -20,5 +42,5 @@ export type Question = {
 export type AIResult = {
   title: string
   summary: string
-  items: Task[]
+  items: Task[] | Idea[] | AdditionalQuestion[] | 
 }
