@@ -1,5 +1,6 @@
 import express from "express"
 import router from "./api/route.ts"
+import "./Ws.ts"
 
 
 const app = express()

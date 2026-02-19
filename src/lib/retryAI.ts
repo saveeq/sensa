@@ -9,7 +9,7 @@ export const retry = async <T>(
 ): Promise<T> => {
   let lastError
 
-  for (let attempt = 1; attempt <= options.retries; attempt++) {
+  for (let attempt = 1; attempt <= options.retries + 1; attempt++) {
     try {
       return await fn()
     } catch (err) {

@@ -4,43 +4,52 @@ export type WishRarity = "common" | "rare" | "epic" | "legendary"
 
 export interface Task {
   id: string
+  type: "task"
+  owner: WorkSpaceOwner  
   text: string
   done: boolean
-  deadline?: Date
-  description?: string
+  deadline?: string
   priority?: TaskPriority
-  tags?: string[]
 }
 
 export interface Idea {
   id: string
-  title: string
-  description?: string
+  type: "idea"
+  owner: WorkSpaceOwner
+  text: string
 }
 
 export interface ShoppingItem {
   id: string
+  type: "shopping"
+  owner: WorkSpaceOwner
   name: string
-  quantity?: string 
+  quantity?: string
   bought: boolean
 }
 
 export interface WishlistItem {
   id: string
+  type: "wishlist"
+  owner: WorkSpaceOwner
   title: string
   price?: string
   link?: string
   rarity: WishRarity
-  isGiftIdea: boolean // пометка, если это идея для подарка
+  isGiftIdea: boolean
 }
 
-export interface AdditionalQuestion  {
+export interface AdditionalQuestion {
   id: string
+  type: "question"
+  owner: WorkSpaceOwner
   text: string
 }
+
+export type AnyItem = Task | Idea | ShoppingItem | WishlistItem | AdditionalQuestion
 
 export type AIResult = {
   title: string
   summary: string
-  items: Task[] | Idea[] | AdditionalQuestion[] | 
+  items: AnyItem[]
 }

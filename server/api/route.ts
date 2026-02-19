@@ -6,10 +6,9 @@ import { sanitizeAIResponse } from "../../src/lib/sanitizeAI"
 import { validateAIResult } from "../../src/lib/validateAI"
 import { SYSTEM_PROMPT, SYSTEM_PROMPT_STRICT } from "../../src/lib/aiPrompt"
 import { buildUserPrompt } from "../../src/lib/userPrompt"
-
+import { retry } from "../../src/lib/retryAI"
 import { adaptAIResult } from "../../src/lib/adaptAIResult"
-import { AIOutput } from "../../src/lib/aiOutput"
-import { AIResult } from "../../src/lib/ai_contract"
+import type { AIOutput } from "../../src/lib/aiOutput"
 
 const router = express.Router()
 
@@ -17,63 +16,41 @@ router.use(cors())
 router.use(express.json())
 
 router.post("/analyze", async (req, res) => {
-  console.log("➡️ /api/analyze called")
+  const { rawInput, mode } = req.body
+  if (!rawInput || !mode) return res.status(400).json({ error: "Invalid input" })
+
+  const userPrompt = buildUserPrompt(rawInput, mode)
+  let currentSystemPrompt = SYSTEM_PROMPT
 
   try {
-    const { rawInput, mode } = req.body
+    const result = await retry(async () => {
+      const aiRaw = await callAI(currentSystemPrompt, userPrompt)
+      console.log("Raw AI response:", aiRaw)
 
-    if (!rawInput || !mode) {
-      return res.status(400).json({ error: "Invalid input" })
-    }
+      const parsed = JSON.parse(sanitizeAIResponse(aiRaw)) as AIOutput
+      console.log("Parsed AI response:", parsed)
 
-    const userPrompt = buildUserPrompt(rawInput, mode)
+      // Порядок важен:
+      // 1. Валидируем RAW ответ от AI по схеме (схема описывает сырые типы)
+      // 2. Только потом адаптируем в контракт (нормализуем типы: shopping_item → shopping)
+      validateAIResult(parsed)
 
-    const runAI = async (systemPrompt: string): Promise<AIResult> => {
-      const aiRaw = await callAI(systemPrompt, userPrompt)
-
-      console.log("🤖 RAW AI RESPONSE:\n", aiRaw)
-
-      // 1. парсим то, что пришло от модели
-      const parsed = JSON.parse(
-        sanitizeAIResponse(aiRaw)
-      ) as AIOutput
-
-      // 2. АДАПТИРУЕМ в формат приложения
-      const adapted = adaptAIResult(parsed)
-
-      // 3. ВАЛИДИРУЕМ УЖЕ АДАПТИРОВАННЫЙ РЕЗУЛЬТАТ
-      validateAIResult(adapted)
+      const adapted = adaptAIResult(parsed, mode)
+      console.log("Adapted AI response:", adapted)
 
       return adapted
-    }
-    let result: AIResult | null = null
-    let lastError: any = null
-
-    // 🔒 РУЧНОЙ retry, БЕЗ абстракций
-    for (const prompt of [SYSTEM_PROMPT, SYSTEM_PROMPT_STRICT]) {
-      try {
-        result = await runAI(prompt)
-        break
-      } catch (err) {
-        console.error("AI attempt failed:", err)
-        lastError = err
+    }, {
+      retries: 2,
+      onRetry: (attempt) => {
+        console.warn(`Attempt ${attempt} failed. Switching to STRICT prompt.`)
+        currentSystemPrompt = SYSTEM_PROMPT_STRICT
       }
-    }
-
-    if (!result) {
-      console.error("❌ All AI attempts failed:", lastError)
-      return res.status(502).json({
-        error: "AI failed to generate valid response",
-      })
-    }
-
-    return res.json(result)
-
-  } catch (err) {
-    console.error("🔥 FATAL /api/analyze error:", err)
-    return res.status(500).json({
-      error: "Internal server error",
     })
+
+    res.json(result)
+  } catch (err: any) {
+    console.error("Final failure:", err)
+    res.status(502).json({ error: "AI processing failed after retries" })
   }
 })
 

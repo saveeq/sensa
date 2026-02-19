@@ -1,70 +1,171 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["title", "summary", "items"],
+  "required": [
+    "title",
+    "summary",
+    "items"
+  ],
+  "additionalProperties": false,
   "properties": {
-    "title": { "type": "string" },
-    "summary": { "type": "string" },
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
     "items": {
       "type": "array",
       "items": {
         "oneOf": [
           {
             "title": "Task",
-            "required": ["id", "text", "done"],
+            "required": [
+              "id",
+              "type",
+              "text",
+              "done"
+            ],
+            "additionalProperties": false,
             "properties": {
-              "id": { "type": "string" },
-              "text": { "type": "string" },
-              "done": { "type": "boolean" },
-              "deadline": { "type": "string", "format": "date-time" },
-              "description": { "type": "string" },
-              "priority": { "enum": ["low", "medium", "high"] },
-              "tags": { "type": "array", "items": { "type": "string" } }
+              "type": {
+                "const": "task"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "text": {
+                "type": "string"
+              },
+              "done": {
+                "type": "boolean"
+              },
+              "deadline": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "priority": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              }
             }
           },
           {
             "title": "Idea",
-            "required": ["id", "title"],
+            "required": [
+              "id",
+              "type",
+              "text"
+            ],
+            "additionalProperties": false,
             "properties": {
-              "id": { "type": "string" },
-              "title": { "type": "string" },
-              "description": { "type": "string" }
-            }
-          },
-          {
-            "title": "AdditionalQuestion",
-            "required": ["id", "text"],
-            "properties": {
-              "id": { "type": "string" },
-              "text": { "type": "string" }
+              "type": {
+                "const": "idea"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "text": {
+                "type": "string"
+              }
             }
           },
           {
             "title": "ShoppingItem",
-            "required": ["id", "name", "bought"],
+            "required": [
+              "id",
+              "type",
+              "name",
+              "bought"
+            ],
+            "additionalProperties": false,
             "properties": {
-              "id": { "type": "string" },
-              "name": { "type": "string" },
-              "quantity": { "type": "string" },
-              "category": { "type": "string" },
-              "bought": { "type": "boolean" }
+              "type": {
+                "const": "shopping_item"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "string"
+              },
+              "bought": {
+                "type": "boolean"
+              }
             }
           },
           {
             "title": "WishlistItem",
-            "required": ["id", "title", "rarity", "isGiftIdea"],
+            "required": [
+              "id",
+              "type",
+              "title",
+              "rarity",
+              "isGiftIdea"
+            ],
+            "additionalProperties": false,
             "properties": {
-              "id": { "type": "string" },
-              "title": { "type": "string" },
-              "rarity": { "enum": ["common", "uncommon", "rare", "epic", "legendary"] },
-              "isGiftIdea": { "type": "boolean" },
-              "price": { "type": "string" },
-              "link": { "type": "string" }
+              "type": {
+                "const": "wishlist_item"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string"
+              },
+              "rarity": {
+                "enum": [
+                  "common",
+                  "rare",
+                  "epic",
+                  "legendary"
+                ]
+              },
+              "isGiftIdea": {
+                "type": "boolean"
+              },
+              "price": {
+                "type": "string"
+              },
+              "link": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "title": "AdditionalQuestion",
+            "required": [
+              "id",
+              "type",
+              "text"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "additional_question"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "text": {
+                "type": "string"
+              }
             }
           }
         ]
       }
     }
-  },
-  "additionalProperties": false
+  }
 }
