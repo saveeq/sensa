@@ -1,7 +1,4 @@
-// src/components/ResultView.tsx
-// Главный компонент который рендерит все секции.
-// Фильтрует айтемы по режиму: "me" → только owner="me", "we" → owner="both"
-
+// src/components/ResultItem.tsx
 "use client"
 
 import React from "react"
@@ -15,25 +12,21 @@ import { WishlistItem } from "./WishlistItem"
 import type { AnyItem, Task, Idea, ShoppingItem as ShoppingItemType, WishlistItem as WishlistItemType } from "@/src/lib/ai_contract"
 
 export const ResultView = () => {
-  const result = useSensaStore((s) => s.result)
   const mode = useSensaStore((s) => s.mode)
+  const meResult = useSensaStore((s) => s.meResult)
+  const weResult = useSensaStore((s) => s.weResult)
+
+  // Берём результат текущего режима напрямую — без фильтрации по owner
+  const result = mode === "we" ? weResult : meResult
 
   if (!result) return null
 
-  // Фильтрация по режиму
-  // "me"  → показываем только owner="me"   (личные задачи)
-  // "we"  → показываем только owner="both" (совместные)
-  const filteredItems: AnyItem[] = result.items.filter((item) => {
-    if (mode === "me") return item.owner === "me"
-    if (mode === "we") return item.owner === "both"
-    return true
-  })
+  const items: AnyItem[] = result.items
 
-  // Разбиваем по типу
-  const tasks     = filteredItems.filter((i): i is Task             => i.type === "task")
-  const ideas     = filteredItems.filter((i): i is Idea             => i.type === "idea")
-  const shopping  = filteredItems.filter((i): i is ShoppingItemType => i.type === "shopping")
-  const wishlist  = filteredItems.filter((i): i is WishlistItemType => i.type === "wishlist")
+  const tasks    = items.filter((i): i is Task             => i.type === "task")
+  const ideas    = items.filter((i): i is Idea             => i.type === "idea")
+  const shopping = items.filter((i): i is ShoppingItemType => i.type === "shopping")
+  const wishlist = items.filter((i): i is WishlistItemType => i.type === "wishlist")
 
   const hasAnything = tasks.length + ideas.length + shopping.length + wishlist.length > 0
 
@@ -51,7 +44,6 @@ export const ResultView = () => {
 
   return (
     <div className="w-full flex flex-col gap-2">
-      {/* Заголовок результата */}
       {result.title && (
         <motion.h2
           initial={{ opacity: 0, y: -8 }}
@@ -62,46 +54,34 @@ export const ResultView = () => {
         </motion.h2>
       )}
 
-      {/* Задачи */}
       <AnimatePresence>
         {tasks.length > 0 && (
           <SpaceSection title="Задачи" count={tasks.length}>
-            {tasks.map((item) => (
-              <TaskItem key={item.id} item={item} />
-            ))}
+            {tasks.map((item) => <TaskItem key={item.id} item={item} />)}
           </SpaceSection>
         )}
       </AnimatePresence>
 
-      {/* Идеи */}
       <AnimatePresence>
         {ideas.length > 0 && (
           <SpaceSection title="Идеи" count={ideas.length}>
-            {ideas.map((item) => (
-              <IdeaItem key={item.id} item={item} />
-            ))}
+            {ideas.map((item) => <IdeaItem key={item.id} item={item} />)}
           </SpaceSection>
         )}
       </AnimatePresence>
 
-      {/* Покупки */}
       <AnimatePresence>
         {shopping.length > 0 && (
           <SpaceSection title="Покупки" count={shopping.length}>
-            {shopping.map((item) => (
-              <ShoppingItem key={item.id} item={item} />
-            ))}
+            {shopping.map((item) => <ShoppingItem key={item.id} item={item} />)}
           </SpaceSection>
         )}
       </AnimatePresence>
 
-      {/* Вишлист */}
       <AnimatePresence>
         {wishlist.length > 0 && (
           <SpaceSection title="Вишлист" count={wishlist.length}>
-            {wishlist.map((item) => (
-              <WishlistItem key={item.id} item={item} />
-            ))}
+            {wishlist.map((item) => <WishlistItem key={item.id} item={item} />)}
           </SpaceSection>
         )}
       </AnimatePresence>

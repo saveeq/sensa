@@ -30,9 +30,6 @@ router.post("/analyze", async (req, res) => {
       const parsed = JSON.parse(sanitizeAIResponse(aiRaw)) as AIOutput
       console.log("Parsed AI response:", parsed)
 
-      // Порядок важен:
-      // 1. Валидируем RAW ответ от AI по схеме (схема описывает сырые типы)
-      // 2. Только потом адаптируем в контракт (нормализуем типы: shopping_item → shopping)
       validateAIResult(parsed)
 
       const adapted = adaptAIResult(parsed, mode)
